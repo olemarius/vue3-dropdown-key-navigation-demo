@@ -1,11 +1,12 @@
 <script lang="ts" setup>
-import { ref, onMounted, defineExpose, computed, inject } from 'vue';
-const selectedIndex = ref(0);
+import { inject } from 'vue';
+import { LIST_INJECTION_KEY, listDefaults } from './key';
+const { showList } = inject(LIST_INJECTION_KEY, listDefaults);
+
 </script>
 
 <template>
-  <br />
-  <div ref="listRef">
-    <slot :list-itemm="listRef" :selected-index="selectedIndex"> </slot>
+  <div v-show="showList">
+    <slot> </slot>
   </div>
 </template>

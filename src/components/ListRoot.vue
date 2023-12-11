@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { ref, provide, watch, computed } from 'vue';
-import { InjectionKey } from './key';
+import { ref, provide, computed } from 'vue';
+import { LIST_INJECTION_KEY } from './key';
 
 const listRef = ref<(HTMLInputElement | null)[]>([]);
 const listCount = computed(() => listRef.value.length);
-const selectedIndex = ref(0);
+const selectedIndex = ref<number>(0);
+const enableList = ref<boolean>(false);
+const showList = computed(() => enableList.value && listCount.value > 0);
 
-provide(InjectionKey, {
+provide(LIST_INJECTION_KEY, {
   listRef,
   listCount,
   selectedIndex,
+  showList
 });
 
 const highlightPrevious = () => {
@@ -28,15 +31,34 @@ const highlightNext = () => {
 };
 
 const handleKeyDown = (event: KeyboardEvent) => {
+
   if (event.key === 'ArrowUp') {
     highlightPrevious();
   } else if (event.key === 'ArrowDown') {
     highlightNext();
+  } else if (event.key === 'Enter'){
+    emit('select', selectedIndex.value)
   }
 };
+
+
+const emit = defineEmits<{ 
+  (e: 'select', index: number): void
+}>();
+
+const eventHandlers = {
+  focus: () => {
+    enableList.value = true;
+  },
+  blur: () => {
+    enableList.value = false;
+  },
+  keydown: handleKeyDown,
+
+    
+}
 </script>
 
 <template>
-  ListRoot listRef: {{ listCount }} <br />
-  <slot :list-ref="listRef" :handle-key-down="handleKeyDown"></slot>
+  <slot :list-ref="listRef" :input-handlers="eventHandlers"></slot>
 </template>
